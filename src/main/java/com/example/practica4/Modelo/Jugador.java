@@ -15,25 +15,13 @@ public class Jugador {
         return nombre;
     }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
     public String getColor() {
         return color;
     }
 
-    public void setColor(String color) {
-        this.color = color;
-    }
 
     public boolean getHumano() {
         return esHumano;
     }
-
-    public void setHumano(boolean esHumano) {
-        this.esHumano = esHumano;
-    }
-
 
 }

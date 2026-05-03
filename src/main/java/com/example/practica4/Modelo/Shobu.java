@@ -1,14 +1,14 @@
 package com.example.practica4.Modelo;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Random;
 
 public class Shobu {
     private HashMap<String, TableroShobu> tableros;
 
     private Jugador jugador1, jugador2, jugadorActual;
-    private String faseTurno;
-    private Ficha fichaSeleccionada;
 
     public Shobu(Jugador jugador1, Jugador jugador2) {
         // Jugador 1 siempre será blancas y Jugador 2 será negras, por lo tanto, el siempre empezara
@@ -26,14 +26,14 @@ public class Shobu {
                 .forEach(nombreTablero -> {
                     TableroShobu tablero = new TableroShobu();
 
-                    for (int rango = 0; rango < 4; rango++ ) {
+                    for (int rango = 0; rango < 4; rango++) {
 
                         tablero.setFicha(3, rango, new Ficha(jugador1.getColor()));
                         tablero.setFicha(0, rango, new Ficha(jugador2.getColor()));
                     }
 
                     tableros.put(nombreTablero, tablero);
-                        });
+                });
     }
 
     public boolean esMovimientoValido(int fila1, int columna1, int fila2, int columna2) {
@@ -136,7 +136,7 @@ public class Shobu {
     public boolean esCasillaDisponible(String llaveTablero, int fila, int col,
                                        int filaAMover, int columnaAMover, boolean esFasePasiva, int distanciaX, int distanciaY) {
         Ficha fichaAMover = tableros.get(llaveTablero).getFicha(filaAMover, columnaAMover);
-        if ( fichaAMover != null && fichaAMover.getColor().equalsIgnoreCase(jugadorActual.getColor())) {
+        if (fichaAMover != null && fichaAMover.getColor().equalsIgnoreCase(jugadorActual.getColor())) {
             return false;
         }
 
@@ -153,7 +153,7 @@ public class Shobu {
     }
 
     // Un problema que me di cuenta es que no verifique que el movimiento
-    // activo sea igual de valido como el pasivo y... pues para eso está el metodo xd
+    // activo sea igual de valido como el pasivo y... pues para eso cree este metodo xd
     public boolean esMovimientoActivoValido(String llaveTablero, int fila1, int col1, int fila2, int col2) {
         int distanciaX = fila2 - fila1;
         int distanciaY = col2 - col1;
@@ -211,5 +211,80 @@ public class Shobu {
             if (fichasJugador2 == 0) return jugador1;
         }
         return null;
+    }
+
+    public ContenedorMovimientosMaquina calcularMovimientoIA() {
+        ArrayList<ContenedorMovimientosMaquina> movimientosDisponibles = new ArrayList<>();
+
+
+        Random rnd = new Random();
+
+        buscarMovimientosPasivos(movimientosDisponibles);
+
+        if (!movimientosDisponibles.isEmpty()) {
+            return movimientosDisponibles.get(rnd.nextInt(movimientosDisponibles.size()));
+        }
+
+        return null;
+    }
+
+    public void buscarMovimientosPasivos(ArrayList<ContenedorMovimientosMaquina> listaMovimientos) {
+        String[] tablerosCreados = {"blanco_propio","oscuro_propio","blanco_opuesto","oscuro_opuesto"};
+        for (String tableroPasivo : tablerosCreados) {
+            TableroShobu pasivoActual = tableros.get(tableroPasivo);
+            for (int pf1 = 0; pf1 < 4; pf1++) {
+                for (int pc1 = 0; pc1 < 4; pc1++) {
+                    Ficha fichaPasiva = pasivoActual.getFicha(pf1, pc1);
+
+                    if (fichaPasiva != null && fichaPasiva.getColor().equalsIgnoreCase(jugadorActual.getColor())) {
+                        for (int disF = -2; disF <= 2; disF++) {
+                            for (int disC = -2; disC <= 2 ; disC++) {
+                                int pf2 = pf1 + disF;
+                                int pc2 = pc1 + disC;
+
+                                if (pf2 >= 0 && pf2 < 4 && pc2 >= 0 && pc2 < 4) {
+                                    if (esCasillaDisponible(tableroPasivo, pf1, pc1, pf2, pc2, true, disF, disC)) {
+                                        buscarMovimientosActivos(tableroPasivo, pf1, pf2, pc1, pc2, disF, disC, listaMovimientos);
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
+    }
+
+    public void buscarMovimientosActivos(String tableroPasivo, int pf1, int pf2, int pc1, int pc2, int disF, int disC, ArrayList<ContenedorMovimientosMaquina> listaMovimientos4) {
+        String colorOpuesto = tableroPasivo.split("_")[0].equalsIgnoreCase("blanco") ? "oscuro" : "blanco";
+        String[] tablerosActivos = {colorOpuesto + "_propio", colorOpuesto + "_opuesto"};
+
+        for (String tableroActivo : tablerosActivos) {
+            TableroShobu activoActual = tableros.get(tableroActivo);
+
+            for (int af1 = 0; af1 < 4; af1++) {
+                for (int ac1 = 0; ac1 < 4; ac1++) {
+                    Ficha fichaActiva = activoActual.getFicha(af1, ac1);
+
+                    if (fichaActiva != null && fichaActiva.getColor().equalsIgnoreCase(jugadorActual.getColor())) {
+                        int af2 = af1 + disF;
+                        int ac2 = ac1 + disC;
+
+                        if (af2 >= 0 && af2 < 4 && ac2 >= 0 && ac2 < 4) {
+                            if (esCasillaDisponible(tableroActivo, af1, ac1, af2, ac2, false, disF, disC)) {
+                                listaMovimientos4.add(new ContenedorMovimientosMaquina(
+                                        tableroPasivo, pf1, pc1, pf2, pc2,
+                                        tableroActivo, af1, ac1, af2, ac2
+                                ));
+                            }
+                        }
+                    }
+                }
+
+            }
+
+        }
     }
 }

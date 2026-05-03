@@ -1,19 +1,18 @@
 package com.example.practica4.Vista;
 
-import com.example.practica4.Controlador.HelloController;
+import com.example.practica4.Controlador.Controlador;
 import com.example.practica4.Modelo.Ficha;
 import com.example.practica4.Modelo.Jugador;
 import com.example.practica4.Modelo.Shobu;
 import com.example.practica4.Modelo.TableroShobu;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -23,9 +22,9 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
-public class HelloApplication extends Application {
+public class VistaShobu extends Application {
     private Shobu juego;
-    private HelloController controlador;
+    private Controlador controlador;
     VBox contenedorVertical;
     HBox contenedorCentral;
     Label labelTurnoActual;
@@ -37,27 +36,33 @@ public class HelloApplication extends Application {
     }
 
     public void crearMenuPrincipal(Stage stage) {
-        VBox menu = new VBox();
+        VBox menu = new VBox(30);
         menu.setAlignment(Pos.CENTER);
+
         Label tituloShobu = new Label("Shobu");
         tituloShobu.getStyleClass().add("titulo");
 
         Button botonJcJ = new Button("Jugador vs Jugador");
-        botonJcJ.setPrefSize(200, 50);
-        botonJcJ.getStyleClass().add("button");
+        botonJcJ.setPrefSize(250, 50);
+        botonJcJ.getStyleClass().add("button-menu");
         botonJcJ.setOnAction(event-> {
             try {
-                iniciarJuego(stage);
+                iniciarJuego(stage, false);
             } catch (IOException e) {
                 mostrarAlerta(Alert.AlertType.ERROR, "Error al crear la aplicación", e.toString());
             }
         });
 
         Button botonJcM = new Button("Jugador vs Maquina");
-        botonJcM.setPrefSize(200, 50);
-        botonJcM.getStyleClass().add("button");
+        botonJcM.setPrefSize(250, 50);
+        botonJcM.getStyleClass().add("button-menu");
+        menu.getStyleClass().add("menu");
         botonJcM.setOnAction(event -> {
-            mostrarAlerta(Alert.AlertType.INFORMATION, "DLC", "El contenido vendrá en la siguiente actualización");
+            try {
+                iniciarJuego(stage, true);
+            } catch (IOException e) {
+                mostrarAlerta(Alert.AlertType.ERROR, "Error al crear la aplicación", e.toString());
+            }
         });
 
         menu.getChildren().addAll(tituloShobu, botonJcJ, botonJcM);
@@ -70,22 +75,32 @@ public class HelloApplication extends Application {
         stage.show();
     }
 
-    public void iniciarJuego(Stage stage) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("/com/example/practica4/hello-view.fxml"));
+    public void iniciarJuego(Stage stage, boolean contraMaquina) throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(VistaShobu.class.getResource("/com/example/practica4/hello-view.fxml"));
         fxmlLoader.load();
 
 
         // El jugador 1 siempre será negras y el 2 blancas
         Jugador j1 = new Jugador("Jugador1", "Negras", true);
-        Jugador j2 = new Jugador("Jugador2", "Blancas", true);
+
+
+        Jugador j2;
+
+        if (contraMaquina) {
+            j2 = new Jugador("Maquina", "Blancas", false);
+        } else {
+            j2 = new Jugador("Jugador2", "Blancas", true);
+        }
+
         juego = new Shobu(j1, j2);
         controlador = fxmlLoader.getController();
         controlador.setJuego(juego);
         controlador.setVista(this);
 
-        contenedorCentral = new HBox();
+        contenedorCentral = new HBox(20);
         contenedorVertical = new VBox(10);
         HBox encabezado = new HBox();
+
         GridPane tableros = new GridPane();
         tableros.setHgap(20);
         tableros.setVgap(20);
@@ -104,16 +119,18 @@ public class HelloApplication extends Application {
         encabezado.setAlignment(Pos.CENTER);
         encabezado.getChildren().addAll(labelTurnoActual, labelFaseActual);
         contenedorVertical.getChildren().addAll(encabezado, contenedorCentral);
+        contenedorVertical.getStyleClass().add("ventana-juego");
         contenedorVertical.setAlignment(Pos.CENTER);
 
         Scene scene = new Scene(contenedorVertical, 600, 600);
+
         scene.getStylesheets().add(getClass().getResource("/com/example/practica4/estilos.css").toExternalForm());
         stage.setTitle("Shobu");
         stage.setScene(scene);
         stage.show();
     }
 
-    public GridPane crearTableros(String nombreTablero, TableroShobu tablero, HelloController controlador) {
+    public GridPane crearTableros(String nombreTablero, TableroShobu tablero, Controlador controlador) {
         GridPane grid = new GridPane();
         grid.getStyleClass().add("tablero");
 

@@ -23,8 +23,4 @@ public class TableroShobu {
     public Ficha[][] getFichasJugador() {
         return fichasJugador;
     }
-
-    public void setFichasJugador(Ficha[][] fichasJugador) {
-        this.fichasJugador = fichasJugador;
-    }
 }

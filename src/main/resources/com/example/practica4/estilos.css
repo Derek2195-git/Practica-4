@@ -1,5 +1,19 @@
 /* Tableros */
 
+.menu {
+    -fx-background-color: #30469D;
+    -fx-background-repeat: no-repeat;
+    -fx-background-size: cover;
+    -fx-background-position: center;
+}
+
+.ventana-juego {
+    -fx-background-color: #3C57C3;
+    -fx-background-repeat: no-repeat;
+    -fx-background-size: cover;
+    -fx-background-position: center;
+}
+
 .tablero {
     -fx-background-color: #FFFFFF;
     -fx-padding: 10px;
@@ -28,6 +42,19 @@
     -fx-brightness: 1.1;
 }
 
+.button-menu {
+    -fx-background-radius: 20px;
+    -fx-font-size: 20px;
+    -fx-padding: 10 20 10 20;
+    -fx-background-color: #307C9D;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.button-menu:hover {
+    -fx-brightness: 1.1;
+}
+
 .casilla-disponible {
     -fx-background-color: #ACFABC;
     -fx-border-color: #4b9d5e;
@@ -42,11 +69,13 @@
 .titulo {
     -fx-font-size: 48px;
     -fx-font-weight: bold;
+    -fx-text-fill: white;
 }
 
 .subtitulo {
     -fx-font-size: 16px;
     -fx-font-weight: bold;
+    -fx-text-fill: white;
 }
 
 .estilo-fase-pasiva {

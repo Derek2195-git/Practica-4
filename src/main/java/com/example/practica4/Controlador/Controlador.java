@@ -2,13 +2,13 @@ package com.example.practica4.Controlador;
 
 import com.example.practica4.Modelo.Ficha;
 import com.example.practica4.Modelo.Jugador;
+import com.example.practica4.Modelo.ContenedorMovimientosMaquina;
 import com.example.practica4.Modelo.Shobu;
-import com.example.practica4.Vista.HelloApplication;
+import com.example.practica4.Vista.VistaShobu;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
 
-public class HelloController {
+public class Controlador {
     @FXML
 
     private String tableroSeleccionado = null;
@@ -16,7 +16,7 @@ public class HelloController {
     private int colSeleccionada = -1;
     private boolean hayFichaSeleccionada = false;
     private Shobu juego;
-    private HelloApplication vista;
+    private VistaShobu vista;
     private boolean esFasePasiva = true;
     private String colorTableroPasivo = "";
     private int movimientoFichaX;
@@ -26,7 +26,7 @@ public class HelloController {
         this.juego = juego;
     }
 
-    public void setVista(HelloApplication vista) {
+    public void setVista(VistaShobu vista) {
         this.vista = vista;
     }
 
@@ -115,6 +115,9 @@ public class HelloController {
                         juego.cambiarTurno();
                         vista.cambiarTextoTurnoActual("Turno de " + juego.getJugadorActual().getNombre());
 
+                        if (!juego.getJugadorActual().getHumano()) {
+                            realizarTurnoMaquina();
+                        }
                     }
                 }
             }
@@ -128,6 +131,27 @@ public class HelloController {
         hayFichaSeleccionada = false;
         tableroSeleccionado = null;
         vista.actualizarVista();
+    }
+
+    public void realizarTurnoMaquina() {
+        ContenedorMovimientosMaquina jugada = juego.calcularMovimientoIA();
+
+        if (jugada != null) {
+            juego.moverFicha(jugada.tableroPasivo, jugada.pasivoFila1, jugada.pasivoColumna1, jugada.pasivoFila2, jugada.pasivoColumna2, true);
+
+            juego.moverFicha(jugada.tableroActivo, jugada.activoFila1, jugada.activoColumna1, jugada.activoFila2, jugada.activoColumna2, false);
+
+            Jugador ganador = juego.verificarGanador();
+
+            if(ganador != null) {
+                vista.cambiarTextoTurnoActual("Ganó la maquina!");
+            } else {
+                juego.cambiarTurno();
+                vista.cambiarTextoTurnoActual("Turno de " + juego.getJugadorActual().getNombre());
+            }
+
+            vista.actualizarVista();
+        }
     }
 
     public boolean getHayFichaSeleccionada() {

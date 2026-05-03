@@ -2,13 +2,13 @@
 
 .tablero {
     -fx-background-color: #FFFFFF;
-    -fx-padding: 10;
+    -fx-padding: 10px;
     -fx-gap: 5;
 }
 
 .tablero-claro {
     -fx-background-color: #EDCDAF;
-    -fx-background-radius: 10px;
+    -fx-background-radius: 5px;
 }
 
 .tablero-oscuro {
@@ -40,7 +40,7 @@
 
 
 .titulo {
-    -fx-font-size: 24px;
+    -fx-font-size: 48px;
     -fx-font-weight: bold;
 }
 
@@ -49,9 +49,16 @@
     -fx-font-weight: bold;
 }
 
-.faseActual {
+.estilo-fase-pasiva {
     -fx-background-color: #80A8CF;
-    -fx-padding: 5 15 5 20;
+    -fx-padding: 5 15 5 15;
+    -fx-background-radius: 20px;
+    -fx-font-weight: bold;
+}
+
+.estilo-fase-agresiva {
+    -fx-background-color: #CF8080;
+    -fx-padding: 5 15 5 15;
     -fx-background-radius: 20px;
     -fx-font-weight: bold;
 }

@@ -5,6 +5,7 @@ import com.example.practica4.Modelo.Jugador;
 import com.example.practica4.Modelo.Shobu;
 import com.example.practica4.Vista.HelloApplication;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 
 public class HelloController {
@@ -32,33 +33,35 @@ public class HelloController {
     public void comprobarClicksEnCasillas(String llaveTablero, int fila, int col) {
         if (juego.verificarGanador() != null) return;
 
+        Ficha fichaSeleccionada = juego.getTableros().get(llaveTablero).getFicha(fila, col);
 
-        if (!hayFichaSeleccionada) {
-            Ficha fichaSeleccionada = juego.getTableros().get(llaveTablero).getFicha(fila, col);
+        boolean esFichaDelJugador = (fichaSeleccionada != null &&
+                fichaSeleccionada.getColor().equalsIgnoreCase(juego.getJugadorActual().getColor()));
 
-            if(fichaSeleccionada != null && fichaSeleccionada.getColor().
-                    equalsIgnoreCase(juego.getJugadorActual().getColor())) {
-                if (esFasePasiva) {
-                    boolean esLadoJugador1 = juego.getJugadorActual().getNombre().equals("Jugador1");
-                    boolean esTableroPropio = llaveTablero.contains("propio");
-                    if ((esLadoJugador1 && esTableroPropio) || (!esLadoJugador1 && !esTableroPropio)) {
-                        seleccionarCasilla(llaveTablero, fila, col);
-                        vista.cambiarTextoTurnoActual( "Turno de: " + juego.getJugadorActual().getNombre());
-                    } else {
-                        vista.cambiarTextoTurnoActual("Error: En la fase pasiva debes elegir un tablero de tu lado.");
-                    }
+        if (esFichaDelJugador) {
+            if (esFasePasiva) {
+                boolean esLadoJugador1 = juego.getJugadorActual().getNombre().equals("Jugador1");
+                boolean esTableroPropio = llaveTablero.contains("propio");
+                if ((esLadoJugador1 && esTableroPropio) || (!esLadoJugador1 && !esTableroPropio)) {
+                    seleccionarCasilla(llaveTablero, fila, col);
+                    vista.cambiarTextoTurnoActual( "Turno de: " + juego.getJugadorActual().getNombre());
                 } else {
-                    if (!llaveTablero.split("_")[0].equalsIgnoreCase(colorTableroPasivo)) {
-                        seleccionarCasilla(llaveTablero, fila, col);
-                        vista.cambiarTextoTurnoActual("Turno de: " + juego.getJugadorActual().getNombre());
-                    } else {
-                        vista.cambiarTextoTurnoActual("Error: Debes elegir un tablero de distinto color");
-                    }
+                    vista.mostrarAlerta(Alert.AlertType.WARNING, "Tablero incorrecto", "En la fase pasiva debes elegir un tablero de tu lado.");
+                }
+            } else {
+                if (!llaveTablero.split("_")[0].equalsIgnoreCase(colorTableroPasivo)) {
+                    seleccionarCasilla(llaveTablero, fila, col);
+                    vista.cambiarTextoTurnoActual("Turno de: " + juego.getJugadorActual().getNombre());
+                } else {
+                    vista.mostrarAlerta(Alert.AlertType.WARNING, "Tablero incorrecto", "En la fase activa debes" +
+                            "elegir un tablero de distinto color al pasivo.");
                 }
             }
-        } else {
+        }
+        else if (hayFichaSeleccionada) {
             moverFicha(llaveTablero, fila, col);
         }
+
     }
 
     public void seleccionarCasilla(String llaveTablero, int fila, int col) {
@@ -66,8 +69,6 @@ public class HelloController {
         filaSeleccionada = fila;
         colSeleccionada = col;
         hayFichaSeleccionada = true;
-        System.out.println("Ficha seleccionada en " + tableroSeleccionado +
-                "["+fila+","+col+"]");
         vista.actualizarVista();
     }
 
@@ -79,7 +80,9 @@ public class HelloController {
 
             if (esFasePasiva) {
                 if (!juego.esMovimientoActivoValido(llaveTablero, filaSeleccionada, colSeleccionada, filaAMover, colAMover)) {
-                    vista.cambiarTextoTurnoActual("Movimiento bloqueado. No puedes replicarlo en la fase activa.");
+                    vista.mostrarAlerta(Alert.AlertType.ERROR, "Movimiento anulado", "No  puedes hacer este movimiento por que" +
+                            "no hay forma de replicarlo en la fase activa");
+
                     hayFichaSeleccionada = false;
                     tableroSeleccionado = null;
                     vista.actualizarVista();
@@ -96,7 +99,7 @@ public class HelloController {
                 huboMovimiento = true;
 
                 vista.cambiarTextoTurnoActual("Turno de " + juego.getJugadorActual().getNombre());
-                System.out.println("Movimiento realizado, pasando a fase agresiva");
+
             } else {
                 if (filaAMover - filaSeleccionada == movimientoFichaX
                         && colAMover - colSeleccionada == movimientoFichaY) {
@@ -111,16 +114,16 @@ public class HelloController {
                     } else {
                         juego.cambiarTurno();
                         vista.cambiarTextoTurnoActual("Turno de " + juego.getJugadorActual().getNombre());
-                        System.out.println("Turno acabado");
+
                     }
                 }
             }
         }
 
         if (!huboMovimiento && hayFichaSeleccionada) {
-            vista.cambiarTextoTurnoActual("Movimiento invalido o bloqueado. Intentalo de nuevo.");
+            vista.mostrarAlerta(Alert.AlertType.WARNING, "Movimiento invalido", "El movimiento realizado no " +
+                    "es valido según las reglas");
         }
-
 
         hayFichaSeleccionada = false;
         tableroSeleccionado = null;
@@ -153,5 +156,9 @@ public class HelloController {
 
     public boolean getEsFasePasiva() {
         return esFasePasiva;
+    }
+
+    public String getColorTableroPasivo() {
+        return colorTableroPasivo;
     }
 }

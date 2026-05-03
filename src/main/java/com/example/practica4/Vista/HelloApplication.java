@@ -9,6 +9,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -32,6 +33,44 @@ public class HelloApplication extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
+        crearMenuPrincipal(stage);
+    }
+
+    public void crearMenuPrincipal(Stage stage) {
+        VBox menu = new VBox();
+        menu.setAlignment(Pos.CENTER);
+        Label tituloShobu = new Label("Shobu");
+        tituloShobu.getStyleClass().add("titulo");
+
+        Button botonJcJ = new Button("Jugador vs Jugador");
+        botonJcJ.setPrefSize(200, 50);
+        botonJcJ.getStyleClass().add("button");
+        botonJcJ.setOnAction(event-> {
+            try {
+                iniciarJuego(stage);
+            } catch (IOException e) {
+                mostrarAlerta(Alert.AlertType.ERROR, "Error al crear la aplicación", e.toString());
+            }
+        });
+
+        Button botonJcM = new Button("Jugador vs Maquina");
+        botonJcM.setPrefSize(200, 50);
+        botonJcM.getStyleClass().add("button");
+        botonJcM.setOnAction(event -> {
+            mostrarAlerta(Alert.AlertType.INFORMATION, "DLC", "El contenido vendrá en la siguiente actualización");
+        });
+
+        menu.getChildren().addAll(tituloShobu, botonJcJ, botonJcM);
+
+        Scene scene = new Scene(menu, 600, 600);
+        scene.getStylesheets().add(getClass().getResource("/com/example/practica4/estilos.css").toExternalForm());
+
+        stage.setTitle("Shobu");
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    public void iniciarJuego(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("/com/example/practica4/hello-view.fxml"));
         fxmlLoader.load();
 
@@ -45,27 +84,26 @@ public class HelloApplication extends Application {
         controlador.setVista(this);
 
         contenedorCentral = new HBox();
-        contenedorVertical = new VBox();
-        HBox encabezado = new HBox(15);
+        contenedorVertical = new VBox(10);
+        HBox encabezado = new HBox();
         GridPane tableros = new GridPane();
         tableros.setHgap(20);
         tableros.setVgap(20);
-        Label tituloShobu = new Label();
-        tituloShobu.getStyleClass().add("titulo");
+
         labelTurnoActual = new Label();
         labelTurnoActual.getStyleClass().add("subtitulo");
         labelFaseActual = new Label("Fase Pasiva");
-        labelFaseActual.getStyleClass().add("faseActual");
+        labelFaseActual.getStyleClass().add("estilo-fase-pasiva");
 
 
         actualizarVista();
-        tituloShobu.setText("Shobu");
+
         labelTurnoActual.setText("Turno de " + j1.getNombre());
         contenedorCentral.getChildren().addAll(tableros);
         contenedorCentral.setAlignment(Pos.CENTER);
         encabezado.setAlignment(Pos.CENTER);
         encabezado.getChildren().addAll(labelTurnoActual, labelFaseActual);
-        contenedorVertical.getChildren().addAll(tituloShobu, encabezado, contenedorCentral);
+        contenedorVertical.getChildren().addAll(encabezado, contenedorCentral);
         contenedorVertical.setAlignment(Pos.CENTER);
 
         Scene scene = new Scene(contenedorVertical, 600, 600);
@@ -77,7 +115,7 @@ public class HelloApplication extends Application {
 
     public GridPane crearTableros(String nombreTablero, TableroShobu tablero, HelloController controlador) {
         GridPane grid = new GridPane();
-        grid.getStyleClass().add("Tablero");
+        grid.getStyleClass().add("tablero");
 
         for (int fila = 0; fila < 4; fila++) {
             for (int col = 0; col < 4; col++) {
@@ -129,7 +167,6 @@ public class HelloApplication extends Application {
         tableros.setVgap(20);
 
         GridPane tableroBlancoOp = crearTableros("blanco_opuesto", juego.getTableros().get("blanco_opuesto"), controlador);
-
         GridPane tableroOscuroOp = crearTableros("oscuro_opuesto", juego.getTableros().get("oscuro_opuesto"), controlador);
         GridPane tableroBlancoPr = crearTableros("blanco_propio", juego.getTableros().get("blanco_propio"), controlador);
         GridPane tableroOscuroPr = crearTableros("oscuro_propio", juego.getTableros().get("oscuro_propio"), controlador);
@@ -139,6 +176,36 @@ public class HelloApplication extends Application {
         tableroBlancoPr.getStyleClass().add("tablero-claro");
         tableroOscuroPr.getStyleClass().add("tablero-oscuro");
 
+        labelFaseActual.getStyleClass().removeAll("estilo-fase-pasiva", "estilo-fase-agresiva");
+
+        if (controlador.getEsFasePasiva()) {
+            labelFaseActual.setText("Fase Pasiva");
+            labelFaseActual.getStyleClass().add("estilo-fase-pasiva");
+
+            if (juego.getJugadorActual().getNombre().equalsIgnoreCase("Jugador1")) {
+                tableroBlancoOp.getStyleClass().add("tablero-inactivo");
+                tableroOscuroOp.getStyleClass().add("tablero-inactivo");
+            } else {
+                tableroBlancoPr.getStyleClass().add("tablero-inactivo");
+                tableroOscuroPr.getStyleClass().add("tablero-inactivo");
+            }
+        } else {
+            labelFaseActual.setText("Fase Agresiva");
+            labelFaseActual.getStyleClass().add("estilo-fase-agresiva");
+
+            String colorPasivo = controlador.getColorTableroPasivo();
+            if (colorPasivo != null) {
+                if (colorPasivo.equalsIgnoreCase("blanco")) {
+                    tableroBlancoPr.getStyleClass().add("tablero-inactivo");
+                    tableroBlancoOp.getStyleClass().add("tablero-inactivo");
+                } else if (colorPasivo.equalsIgnoreCase("oscuro")){
+                    tableroOscuroPr.getStyleClass().add("tablero-inactivo");
+                    tableroOscuroOp.getStyleClass().add("tablero-inactivo");
+
+                }
+            }
+        }
+        
         tableros.add(tableroOscuroOp, 0, 0);
         tableros.add(tableroBlancoOp, 1, 0);
         tableros.add(tableroOscuroPr, 0, 1);
@@ -154,6 +221,15 @@ public class HelloApplication extends Application {
     public void cambiarTextoTurnoActual(String nuevoMensaje) {
         labelTurnoActual.setText(nuevoMensaje);
         labelTurnoActual.setAlignment(Pos.CENTER);
+    }
+
+    public void mostrarAlerta(Alert.AlertType tipo, String titulo, String mensaje) {
+        Alert alerta = new Alert(tipo);
+        alerta.setTitle(titulo);
+        alerta.setHeaderText(null);
+        alerta.setContentText(mensaje);
+        alerta.showAndWait();
+
     }
 
 }

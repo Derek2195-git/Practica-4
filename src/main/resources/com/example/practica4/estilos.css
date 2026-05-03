@@ -1,0 +1,59 @@
+/* Tableros */
+
+.tablero {
+    -fx-background-color: #FFFFFF;
+    -fx-padding: 10;
+    -fx-gap: 5;
+}
+
+.tablero-claro {
+    -fx-background-color: #EDCDAF;
+    -fx-background-radius: 10px;
+}
+
+.tablero-oscuro {
+    -fx-background-color: #3A230D;
+    -fx-background-radius: 10px;
+}
+
+.tablero-inactivo {
+    -fx-opacity: 0.35;
+}
+
+.button {
+    -fx-background-radius: 5;
+}
+
+.button:hover {
+    -fx-brightness: 1.1;
+}
+
+.casilla-disponible {
+    -fx-background-color: #ACFABC;
+    -fx-border-color: #4b9d5e;
+    -fx-border-width: 2;
+    -fx-border-radius: 5;
+}
+.casilla-disponible:hover {
+    -fx-brightness: 1.1;
+}
+
+
+.titulo {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+}
+
+.subtitulo {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.faseActual {
+    -fx-background-color: #80A8CF;
+    -fx-padding: 5 15 5 20;
+    -fx-background-radius: 20px;
+    -fx-font-weight: bold;
+}
+
+

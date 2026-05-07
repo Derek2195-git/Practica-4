@@ -5,6 +5,7 @@ import com.example.practica4.Modelo.Jugador;
 import com.example.practica4.Modelo.ContenedorMovimientosMaquina;
 import com.example.practica4.Modelo.Shobu;
 import com.example.practica4.Vista.VistaShobu;
+import javafx.application.Application;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 
@@ -22,6 +23,11 @@ public class Controlador {
     private int movimientoFichaX;
     private int movimientoFichaY;
 
+    public static void main(String[] args) {
+        Application.launch(VistaShobu.class, args);
+        Controlador controlador;
+    }
+
     public void setJuego(Shobu juego) {
         this.juego = juego;
     }
@@ -30,7 +36,7 @@ public class Controlador {
         this.vista = vista;
     }
 
-    public void comprobarClicksEnCasillas(String llaveTablero, int fila, int col) {
+    public void comprobarClicksEnCasillas(String llaveTablero, int fila, int col){
         if (juego.verificarGanador() != null) return;
 
         Ficha fichaSeleccionada = juego.getTableros().get(llaveTablero).getFicha(fila, col);
@@ -40,7 +46,7 @@ public class Controlador {
 
         if (esFichaDelJugador) {
             if (esFasePasiva) {
-                boolean esLadoJugador1 = juego.getJugadorActual().getNombre().equals("Jugador1");
+                boolean esLadoJugador1 = juego.getJugadorActual().getNombre().equals(juego.getJugador1().getNombre());
                 boolean esTableroPropio = llaveTablero.contains("propio");
                 if ((esLadoJugador1 && esTableroPropio) || (!esLadoJugador1 && !esTableroPropio)) {
                     seleccionarCasilla(llaveTablero, fila, col);
@@ -53,7 +59,7 @@ public class Controlador {
                     seleccionarCasilla(llaveTablero, fila, col);
                     vista.cambiarTextoTurnoActual("Turno de: " + juego.getJugadorActual().getNombre());
                 } else {
-                    vista.mostrarAlerta(Alert.AlertType.WARNING, "Tablero incorrecto", "En la fase activa debes" +
+                    vista.mostrarAlerta(Alert.AlertType.WARNING, "Tablero incorrecto", "En la fase activa debes " +
                             "elegir un tablero de distinto color al pasivo.");
                 }
             }
@@ -137,9 +143,9 @@ public class Controlador {
         ContenedorMovimientosMaquina jugada = juego.calcularMovimientoIA();
 
         if (jugada != null) {
-            juego.moverFicha(jugada.tableroPasivo, jugada.pasivoFila1, jugada.pasivoColumna1, jugada.pasivoFila2, jugada.pasivoColumna2, true);
+            juego.moverFicha(jugada.getTableroPasivo(), jugada.getPasivoFila1(), jugada.getPasivoColumna1(), jugada.getPasivoFila2(), jugada.getPasivoColumna2(), true);
 
-            juego.moverFicha(jugada.tableroActivo, jugada.activoFila1, jugada.activoColumna1, jugada.activoFila2, jugada.activoColumna2, false);
+            juego.moverFicha(jugada.getTableroActivo(), jugada.getActivoFila1(), jugada.getActivoColumna1(), jugada.getActivoFila2(), jugada.getActivoColumna2(), false);
 
             Jugador ganador = juego.verificarGanador();
 

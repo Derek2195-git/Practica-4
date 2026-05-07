@@ -3,9 +3,6 @@ module com.example.practica4 {
     requires javafx.fxml;
     requires javafx.graphics;
 
-
-    opens com.example.practica4 to javafx.fxml;
-
     exports com.example.practica4.Modelo;
     opens com.example.practica4.Modelo to javafx.fxml;
     exports com.example.practica4.Vista;

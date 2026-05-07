@@ -7,7 +7,6 @@ import com.example.practica4.Modelo.Shobu;
 import com.example.practica4.Modelo.TableroShobu;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -31,7 +30,7 @@ public class VistaShobu extends Application {
     Label labelFaseActual;
 
     @Override
-    public void start(Stage stage) throws IOException {
+    public void start(Stage stage) {
         crearMenuPrincipal(stage);
     }
 
@@ -75,15 +74,19 @@ public class VistaShobu extends Application {
         stage.show();
     }
 
+    /**
+     * Esta clase nos permite crear una ventana del juego de Shobu
+     * @param stage
+     * @param contraMaquina
+     * @throws IOException
+     */
     public void iniciarJuego(Stage stage, boolean contraMaquina) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(VistaShobu.class.getResource("/com/example/practica4/hello-view.fxml"));
         fxmlLoader.load();
 
 
         // El jugador 1 siempre será negras y el 2 blancas
-        Jugador j1 = new Jugador("Jugador1", "Negras", true);
-
-
+        Jugador j1 = new Jugador("Derek", "Negras", true);
         Jugador j2;
 
         if (contraMaquina) {
@@ -130,6 +133,13 @@ public class VistaShobu extends Application {
         stage.show();
     }
 
+    /**
+     * Este metodo crea los 4 tableros
+     * @param nombreTablero
+     * @param tablero
+     * @param controlador
+     * @return Regresa un GridPane, donde se dibuja el tablero
+     */
     public GridPane crearTableros(String nombreTablero, TableroShobu tablero, Controlador controlador) {
         GridPane grid = new GridPane();
         grid.getStyleClass().add("tablero");
@@ -165,9 +175,8 @@ public class VistaShobu extends Application {
                         botonCasilla.getStyleClass().add("casilla-disponible");
                     }
                 }
-                botonCasilla.setOnMouseClicked(mouseEvent -> {
-                    controlador.comprobarClicksEnCasillas(nombreTablero, filaActual, colActual);
-                });
+                botonCasilla.setOnMouseClicked(e ->
+                        controlador.comprobarClicksEnCasillas(nombreTablero, filaActual, colActual));
 
                 grid.add(botonCasilla, col, fila);
             }
@@ -179,37 +188,54 @@ public class VistaShobu extends Application {
     public void actualizarVista() {
         contenedorCentral.getChildren().clear();
 
+        // Creamos cada tablero y le añadimos un espacio horizontal y vertical de 20 px
         GridPane tableros = new GridPane();
         tableros.setHgap(20);
         tableros.setVgap(20);
 
+        // Creamos cada tablero, y les damos cada tablero que creamos para el juego, asimismo, le pasamos el controlador para conectarlo
         GridPane tableroBlancoOp = crearTableros("blanco_opuesto", juego.getTableros().get("blanco_opuesto"), controlador);
         GridPane tableroOscuroOp = crearTableros("oscuro_opuesto", juego.getTableros().get("oscuro_opuesto"), controlador);
         GridPane tableroBlancoPr = crearTableros("blanco_propio", juego.getTableros().get("blanco_propio"), controlador);
         GridPane tableroOscuroPr = crearTableros("oscuro_propio", juego.getTableros().get("oscuro_propio"), controlador);
 
+        // Actualizamos los estilos de cada tablero
         tableroBlancoOp.getStyleClass().add("tablero-claro");
         tableroOscuroOp.getStyleClass().add("tablero-oscuro");
         tableroBlancoPr.getStyleClass().add("tablero-claro");
         tableroOscuroPr.getStyleClass().add("tablero-oscuro");
 
+        // Removemos el estilo del label que tenemos para cada fase
         labelFaseActual.getStyleClass().removeAll("estilo-fase-pasiva", "estilo-fase-agresiva");
 
         if (controlador.getEsFasePasiva()) {
-            labelFaseActual.setText("Fase Pasiva");
-            labelFaseActual.getStyleClass().add("estilo-fase-pasiva");
+            // Si aun no hay un ganador, hacemos que el boton refleje la fase actual
+            if (!juego.hayGanador()) {
+                labelFaseActual.setText("Fase Pasiva");
+                labelFaseActual.getStyleClass().add("estilo-fase-pasiva");
+            } else {
+                labelFaseActual.setText("");
+            }
 
-            if (juego.getJugadorActual().getNombre().equalsIgnoreCase("Jugador1")) {
+            // Si el jugador actual es el primero, volvemos como inactivos a los opuestos
+            if (juego.getJugadorActual().getNombre().equalsIgnoreCase(juego.getJugador1().getNombre())) {
                 tableroBlancoOp.getStyleClass().add("tablero-inactivo");
                 tableroOscuroOp.getStyleClass().add("tablero-inactivo");
             } else {
+                // Si no, volvemos los suyos como inactivos
                 tableroBlancoPr.getStyleClass().add("tablero-inactivo");
                 tableroOscuroPr.getStyleClass().add("tablero-inactivo");
             }
         } else {
-            labelFaseActual.setText("Fase Agresiva");
-            labelFaseActual.getStyleClass().add("estilo-fase-agresiva");
+            // Actualizamos el texto de la fase
+            if (!juego.hayGanador()) {
+                labelFaseActual.setText("Fase Agresiva");
+                labelFaseActual.getStyleClass().add("estilo-fase-agresiva");
+            } else {
+                labelFaseActual.setText("");
+            }
 
+            // Usamos esto para volver inactivos a los tableros oscuros o blancos, dependiendo de que se hizó la primera acción
             String colorPasivo = controlador.getColorTableroPasivo();
             if (colorPasivo != null) {
                 if (colorPasivo.equalsIgnoreCase("blanco")) {
@@ -222,12 +248,14 @@ public class VistaShobu extends Application {
                 }
             }
         }
-        
+
+        // Añadimos al GridPane cada tablero
         tableros.add(tableroOscuroOp, 0, 0);
         tableros.add(tableroBlancoOp, 1, 0);
         tableros.add(tableroOscuroPr, 0, 1);
         tableros.add(tableroBlancoPr, 1, 1);
 
+        // Lo centramos y lo metemos al contenedor central
         tableros.setAlignment(Pos.CENTER);
 
         contenedorCentral.getChildren().add(tableros);

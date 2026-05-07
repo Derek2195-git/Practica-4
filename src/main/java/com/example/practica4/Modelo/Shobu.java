@@ -1,5 +1,7 @@
 package com.example.practica4.Modelo;
 
+import com.example.practica4.Vista.VistaShobu;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -9,13 +11,14 @@ public class Shobu {
     private HashMap<String, TableroShobu> tableros;
 
     private Jugador jugador1, jugador2, jugadorActual;
+    private boolean ganadorDeclarado;
 
     public Shobu(Jugador jugador1, Jugador jugador2) {
         // Jugador 1 siempre será blancas y Jugador 2 será negras, por lo tanto, el siempre empezara
         this.jugador1 = jugador1;
         jugadorActual = jugador1;
         this.jugador2 = jugador2;
-        this.tableros = new HashMap<String, TableroShobu>();
+        this.tableros = new HashMap<>();
 
         inicializarTableros();
     }
@@ -52,14 +55,14 @@ public class Shobu {
 
     public boolean noHayObstaculos(String llaveTablero, int fila1, int columna1, int fila2, int columna2, boolean esFasePasiva) {
         TableroShobu tablero = tableros.get(llaveTablero);
-        int direccionFilas = 0;
-        int direccionColumnas = 0;
-        // Recuerda que cambiaremos esto a lambdas
+        int direccionFilas;
+        int direccionColumnas;
+
         direccionColumnas = Integer.compare(columna2, columna1);
         direccionFilas = Integer.compare(fila2, fila1);
 
-//        if (columna2 > columna1) direccionColumnas = 1;
-//        else if (columna2 < columna1) direccionColumnas = -1;
+        //if (columna2 > columna1) direccionColumnas = 1;
+        //else if (columna2 < columna1) direccionColumnas = -1;
 
         int filaIntermedia = fila1 + direccionFilas;
         int columnaIntermedia = columna1 + direccionColumnas;
@@ -96,8 +99,8 @@ public class Shobu {
         Ficha fichaAEmpujar = tablero.getFicha(fila2, columna2);
 
         if (!esFasePasiva && fichaAEmpujar != null) {
-            int direccionFilas = 0;
-            int direccionColumnas = 0;
+            int direccionFilas;
+            int direccionColumnas;
 
             direccionColumnas = Integer.compare(columna2, columna1);
             direccionFilas = Integer.compare(fila2, fila1);
@@ -107,8 +110,6 @@ public class Shobu {
 
             if (filaFichaEmpujada >= 0 && filaFichaEmpujada < 4 && colFichaEmpujada >= 0 && colFichaEmpujada < 4) {
                 tablero.setFicha(filaFichaEmpujada, colFichaEmpujada, fichaAEmpujar);
-            } else {
-                System.out.println("Ficha capturada");
             }
         }
 
@@ -117,10 +118,17 @@ public class Shobu {
         tablero.setFicha(fila1, columna1, null);
     }
 
+    public boolean hayGanador() {
+        return ganadorDeclarado;
+    }
+
+    public Jugador getJugador1() {
+        return jugador1;
+    }
+
     public Jugador getJugadorActual() {
         return jugadorActual;
     }
-
 
     public HashMap<String, TableroShobu> getTableros() {
         return tableros;
@@ -188,10 +196,10 @@ public class Shobu {
 
     public Jugador verificarGanador() {
         for (TableroShobu tablero : tableros.values()) {
-            int fichasJugador1 = 0;
-            int fichasJugador2 = 0;
+            int fichasJugador1;
+            int fichasJugador2;
 
-            fichasJugador1 = (int) Arrays.stream(tablero.getFichasJugador())
+            fichasJugador1 = Arrays.stream(tablero.getcasillaTablero())
                     //flatMap
                     .mapToInt(fila -> (int) Arrays.stream(fila)
                             .filter(ficha -> ficha != null && ficha.getColor().equalsIgnoreCase(jugador1.getColor()))
@@ -199,7 +207,7 @@ public class Shobu {
                     .sum();
 
 
-            fichasJugador2 = (int) Arrays.stream(tablero.getFichasJugador())
+            fichasJugador2 = Arrays.stream(tablero.getcasillaTablero())
                     //flatMap
                     .mapToInt(fila -> (int) Arrays.stream(fila)
                             .filter(ficha -> ficha != null && ficha.getColor().equalsIgnoreCase(jugador2.getColor()))
@@ -207,8 +215,14 @@ public class Shobu {
                     .sum();
 
             // Si un jugador se queda sin fichas, el otro gana
-            if (fichasJugador1 == 0) return jugador2;
-            if (fichasJugador2 == 0) return jugador1;
+            if (fichasJugador1 == 0) {
+                ganadorDeclarado = true;
+                return jugador2;
+            }
+            if (fichasJugador2 == 0) {
+                ganadorDeclarado = true;
+                return jugador1;
+            }
         }
         return null;
     }
@@ -229,7 +243,7 @@ public class Shobu {
     }
 
     public void buscarMovimientosPasivos(ArrayList<ContenedorMovimientosMaquina> listaMovimientos) {
-        String[] tablerosCreados = {"blanco_propio","oscuro_propio","blanco_opuesto","oscuro_opuesto"};
+        String[] tablerosCreados = {"blanco_propio", "oscuro_propio", "blanco_opuesto", "oscuro_opuesto"};
         for (String tableroPasivo : tablerosCreados) {
             TableroShobu pasivoActual = tableros.get(tableroPasivo);
             for (int pf1 = 0; pf1 < 4; pf1++) {
@@ -238,7 +252,7 @@ public class Shobu {
 
                     if (fichaPasiva != null && fichaPasiva.getColor().equalsIgnoreCase(jugadorActual.getColor())) {
                         for (int disF = -2; disF <= 2; disF++) {
-                            for (int disC = -2; disC <= 2 ; disC++) {
+                            for (int disC = -2; disC <= 2; disC++) {
                                 int pf2 = pf1 + disF;
                                 int pc2 = pc1 + disC;
 
@@ -287,4 +301,6 @@ public class Shobu {
 
         }
     }
+
+
 }

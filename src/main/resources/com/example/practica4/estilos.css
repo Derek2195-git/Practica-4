@@ -53,6 +53,8 @@
 
 .button-menu:hover {
     -fx-brightness: 1.1;
+    -fx-background-color: #42a4d0;
+    -fx-cursor: hand;
 }
 
 .casilla-disponible {

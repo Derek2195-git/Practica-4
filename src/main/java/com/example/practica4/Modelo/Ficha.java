@@ -1,8 +1,5 @@
 package com.example.practica4.Modelo;
 
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
-
 public class Ficha {
     String color;
 
@@ -18,4 +15,5 @@ public class Ficha {
     public String toString() {
         return "Ficha de color " + color;
     }
+
 }

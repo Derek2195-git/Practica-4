@@ -102,7 +102,7 @@ public class VistaShobu extends Application {
 
         contenedorCentral = new HBox(20);
         contenedorVertical = new VBox(10);
-        HBox encabezado = new HBox();
+        HBox encabezado = new HBox(10);
 
         GridPane tableros = new GridPane();
         tableros.setHgap(20);

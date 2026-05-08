@@ -1,13 +1,16 @@
 package com.example.practica4.Modelo;
 
+/**
+ * Tablero de shobu representado como un arreglo de fichas
+ */
 public class TableroShobu {
-    Ficha[][] casillaTablero;
+    Ficha[][] tablero;
 
     /**
      * Constructor de la clase tableroShobu
      */
     public TableroShobu() {
-        casillaTablero = new Ficha[4][4];
+        tablero = new Ficha[4][4];
     }
 
     /**
@@ -19,7 +22,7 @@ public class TableroShobu {
      */
     public Ficha getFicha(int fila, int col) {
         if (fila >= 0 && fila < 4 && col >= 0 && col < 4) {
-            return casillaTablero[fila][col];
+            return tablero[fila][col];
         }
         return null;
     }
@@ -32,7 +35,7 @@ public class TableroShobu {
      */
     public void setFicha(int fila, int col, Ficha ficha) {
         if (fila >= 0 && fila < 4 && col >= 0 && col < 4) {
-            casillaTablero[fila][col] = ficha;
+            tablero[fila][col] = ficha;
         }
     }
 
@@ -41,6 +44,6 @@ public class TableroShobu {
      * @return Todos los elementos que hay en el tablero, sean fichas o valores nulos
      */
     public Ficha[][] getcasillaTablero() {
-        return casillaTablero;
+        return tablero;
     }
 }

@@ -1,5 +1,8 @@
 package com.example.practica4.Modelo;
 
+/**
+ * Una ficha para el tablero de sudoku
+ */
 public class Ficha {
     String color;
 

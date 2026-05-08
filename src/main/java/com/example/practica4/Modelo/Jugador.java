@@ -1,5 +1,8 @@
 package com.example.practica4.Modelo;
 
+/**
+ * Jugador para cada tablero del shobu
+ */
 public class Jugador {
     private String nombre;
     private String color;

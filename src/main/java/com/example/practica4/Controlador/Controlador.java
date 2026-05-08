@@ -9,6 +9,9 @@ import javafx.application.Application;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 
+/**
+ * Controlador que conecta el apartado visual y lógico del Shobu
+ */
 public class Controlador {
     @FXML
 

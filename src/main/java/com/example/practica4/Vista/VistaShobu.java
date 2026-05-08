@@ -21,6 +21,9 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
+/**
+ * Apartado visual del shobu
+ */
 public class VistaShobu extends Application {
     private Shobu juego;
     private Controlador controlador;

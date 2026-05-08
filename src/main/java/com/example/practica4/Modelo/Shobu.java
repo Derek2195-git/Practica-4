@@ -7,6 +7,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
 
+/**
+ * Logica para correr el juego de shobu
+ */
 public class Shobu {
     private HashMap<String, TableroShobu> tableros;
 
@@ -22,7 +25,7 @@ public class Shobu {
         this.jugador1 = jugador1;
         jugadorActual = jugador1;
         this.jugador2 = jugador2;
-        this.tableros = new HashMap<>();
+        tableros = new HashMap<>();
 
         inicializarTableros();
     }
@@ -36,10 +39,10 @@ public class Shobu {
                 .forEach(nombreTablero -> {
                     TableroShobu tablero = new TableroShobu();
 
-                    for (int rango = 0; rango < 4; rango++) {
+                    for (int columnaAPoner = 0; columnaAPoner < 4; columnaAPoner++) {
 
-                        tablero.setFicha(3, rango, new Ficha(jugador1.getColor()));
-                        tablero.setFicha(0, rango, new Ficha(jugador2.getColor()));
+                        tablero.setFicha(3, columnaAPoner, new Ficha(jugador1.getColor()));
+                        tablero.setFicha(0, columnaAPoner, new Ficha(jugador2.getColor()));
                     }
 
                     tableros.put(nombreTablero, tablero);
@@ -55,6 +58,7 @@ public class Shobu {
      * @return Verificación de que el movimiento es posible por la ficha seleccionada
      */
     public boolean esMovimientoValido(int fila1, int columna1, int fila2, int columna2) {
+        // Obtenemos la distancia que moveremos la ficha horizontal y verticalmente, usando abs para evitar valores negativos
         int distanciaFila = Math.abs(fila2 - fila1);
         int distanciaCol = Math.abs(columna2 - columna1);
 
@@ -82,6 +86,8 @@ public class Shobu {
         TableroShobu tablero = tableros.get(llaveTablero);
         int direccionFilas;
         int direccionColumnas;
+        int distanciaFila = Math.abs(fila2 - fila1);
+        int distanciaCol = Math.abs(columna2 - columna1);
 
         direccionColumnas = Integer.compare(columna2, columna1);
         direccionFilas = Integer.compare(fila2, fila1);
@@ -92,10 +98,13 @@ public class Shobu {
         int filaIntermedia = fila1 + direccionFilas;
         int columnaIntermedia = columna1 + direccionColumnas;
 
-        if (Math.abs(fila2 - fila1) >= 2 || Math.abs(columna2 - columna1) >= 2) {
-            if (tablero.getFicha(filaIntermedia, columnaIntermedia) != null) {
+        if (distanciaFila >= 2 || distanciaCol >= 2) {
+            Ficha fichaIntermedia = tablero.getFicha(filaIntermedia, columnaIntermedia);
+            if (fichaIntermedia != null) {
                 // Si hay una ficha entre medio, no se puede mover nuestra ficha
-                return false;
+                if (esFasePasiva || esFichaDelJugadorActual(fichaIntermedia)) {
+                    return false;
+                }
             }
         }
         // Por ultimo, revisamos que la posicion a la que moveremos tambien esta vacia
@@ -105,12 +114,13 @@ public class Shobu {
         } else {
             if (fichaAMover == null) return true;
 
-            if (fichaAMover.getColor().equalsIgnoreCase(jugadorActual.getColor())) return false;
+            if (esFichaDelJugadorActual(fichaAMover)) return false;
 
-            int filaDetras = fila2 + direccionFilas;
-            int colDetras = columna2 + direccionColumnas;
+            int distancia = Math.max(distanciaFila, distanciaCol);
+            int filaDetras = fila2 + direccionFilas ;
+            int colDetras = columna2 + direccionColumnas ;
 
-            if (filaDetras >= 0 && filaDetras < 4 && colDetras >= 0 && colDetras < 4) {
+            if (estaEnTablero(filaDetras, colDetras)) {
                 return tablero.getFicha(filaDetras, colDetras) == null;
             }
 
@@ -120,11 +130,12 @@ public class Shobu {
 
     /**
      * Este metodo mueve la ficha en el tablero
+     *
      * @param llaveTablero Nombre del tablero donde moveremos la ficha
-     * @param fila1 Fila del tablero donde se ubica la ficha
-     * @param columna1 Columna del tablero donde se ubica la ficha
-     * @param fila2 Fila del tablero a donde moveremos la ficha
-     * @param columna2 Columna del tablero a donde moveremos la ficha
+     * @param fila1        Fila del tablero donde se ubica la ficha
+     * @param columna1     Columna del tablero donde se ubica la ficha
+     * @param fila2        Fila del tablero a donde moveremos la ficha
+     * @param columna2     Columna del tablero a donde moveremos la ficha
      * @param esFasePasiva Comprueba si nos ubicamos actualmente en la fase pasiva
      */
     public void moverFicha(String llaveTablero, int fila1, int columna1, int fila2, int columna2, boolean esFasePasiva) {
@@ -132,22 +143,33 @@ public class Shobu {
         Ficha fichaAMover = tablero.getFicha(fila1, columna1);
         Ficha fichaAEmpujar = tablero.getFicha(fila2, columna2);
 
-        if (!esFasePasiva && fichaAEmpujar != null) {
-            int direccionFilas;
-            int direccionColumnas;
+        int direccionColumnas = Integer.compare(columna2, columna1);
+        int direccionFilas = Integer.compare(fila2, fila1);
+        int filaIntermedia = fila1 + direccionFilas;
+        int columnaIntermedia = columna1 + direccionColumnas;
 
-            direccionColumnas = Integer.compare(columna2, columna1);
-            direccionFilas = Integer.compare(fila2, fila1);
-
-            int filaFichaEmpujada = fila2 + direccionFilas;
-            int colFichaEmpujada = columna2 + direccionColumnas;
-
-            if (filaFichaEmpujada >= 0 && filaFichaEmpujada < 4 && colFichaEmpujada >= 0 && colFichaEmpujada < 4) {
-                tablero.setFicha(filaFichaEmpujada, colFichaEmpujada, fichaAEmpujar);
+        // Si no hay ficha en el destino, puede estar en la intermedia (movimiento de 2 casillas)
+        int filaEmpuje = fila2;
+        int colEmpuje = columna2;
+        if (!esFasePasiva && fichaAEmpujar == null) {
+            Ficha fichaIntermedia = tablero.getFicha(filaIntermedia, columnaIntermedia);
+            if (fichaIntermedia != null && !esFichaDelJugadorActual(fichaIntermedia)) {
+                fichaAEmpujar = fichaIntermedia;
+                filaEmpuje = filaIntermedia;
+                colEmpuje = columnaIntermedia;
             }
         }
 
-        // Movemos la ficha y volvemos como nula la posicion de la ficha anterior
+        if (!esFasePasiva && fichaAEmpujar != null) {
+            int filaFichaEmpujada = fila2 + direccionFilas;
+            int colFichaEmpujada = fila2 + direccionColumnas;
+
+            if (estaEnTablero(filaFichaEmpujada, colFichaEmpujada)) {
+                tablero.setFicha(filaFichaEmpujada, colFichaEmpujada, fichaAEmpujar);
+            }
+            tablero.setFicha(filaEmpuje, colEmpuje, null);
+        }
+
         tablero.setFicha(fila2, columna2, fichaAMover);
         tablero.setFicha(fila1, columna1, null);
     }
@@ -210,7 +232,7 @@ public class Shobu {
     public boolean esCasillaDisponible(String llaveTablero, int fila, int col,
                                        int filaAMover, int columnaAMover, boolean esFasePasiva, int distanciaX, int distanciaY) {
         Ficha fichaAMover = tableros.get(llaveTablero).getFicha(filaAMover, columnaAMover);
-        if (fichaAMover != null && fichaAMover.getColor().equalsIgnoreCase(jugadorActual.getColor())) {
+        if (esFichaDelJugadorActual(fichaAMover)) {
             return false;
         }
 
@@ -239,7 +261,7 @@ public class Shobu {
         int distanciaX = fila2 - fila1;
         int distanciaY = col2 - col1;
 
-        String colorOpuesto = llaveTablero.split("_")[0].equalsIgnoreCase("blanco") ? "oscuro" : "blanco";
+        String colorOpuesto = colorOpuestoTablero(llaveTablero);
         String[] tablerosActivosValidos = {colorOpuesto + "_propio", colorOpuesto + "_opuesto"};
 
         return Arrays.stream(tablerosActivosValidos).anyMatch(nombreTablero -> {
@@ -248,12 +270,11 @@ public class Shobu {
             for (int f = 0; f < 4; f++) {
                 for (int c = 0; c < 4; c++) {
                     Ficha ficha = tablero.getFicha(f, c);
-                    if (ficha != null && ficha.getColor().equalsIgnoreCase(jugadorActual.getColor())) {
+                    if (esFichaDelJugadorActual(ficha)) {
                         int destinoFila = f + distanciaX;
                         int destinoCol = c + distanciaY;
 
-                        if (destinoFila >= 0 && destinoFila < 4
-                                && destinoCol >= 0 && destinoCol < 4) {
+                        if (estaEnTablero(destinoFila, destinoCol)) {
                             if (esCasillaDisponible(nombreTablero, f, c, destinoFila, destinoCol, false, distanciaX, distanciaY)) {
                                 return true;
                             }
@@ -335,13 +356,13 @@ public class Shobu {
                 for (int pc1 = 0; pc1 < 4; pc1++) {
                     Ficha fichaPasiva = pasivoActual.getFicha(pf1, pc1);
 
-                    if (fichaPasiva != null && fichaPasiva.getColor().equalsIgnoreCase(jugadorActual.getColor())) {
+                    if (esFichaDelJugadorActual(fichaPasiva)) {
                         for (int disF = -2; disF <= 2; disF++) {
                             for (int disC = -2; disC <= 2; disC++) {
                                 int pf2 = pf1 + disF;
                                 int pc2 = pc1 + disC;
 
-                                if (pf2 >= 0 && pf2 < 4 && pc2 >= 0 && pc2 < 4) {
+                                if (estaEnTablero(pf2, pc2)) {
                                     if (esCasillaDisponible(tableroPasivo, pf1, pc1, pf2, pc2, true, disF, disC)) {
                                         buscarMovimientosActivos(tableroPasivo, pf1, pf2, pc1, pc2, disF, disC, listaMovimientos);
                                     }
@@ -368,7 +389,7 @@ public class Shobu {
      * @param listaMovimientos Lista de movimientos posibles en el tablero pasivo
      */
     public void buscarMovimientosActivos(String tableroPasivo, int pf1, int pf2, int pc1, int pc2, int disF, int disC, ArrayList<ContenedorMovimientosMaquina> listaMovimientos) {
-        String colorOpuesto = tableroPasivo.split("_")[0].equalsIgnoreCase("blanco") ? "oscuro" : "blanco";
+        String colorOpuesto = colorOpuestoTablero(tableroPasivo);
         String[] tablerosActivos = {colorOpuesto + "_propio", colorOpuesto + "_opuesto"};
 
         for (String tableroActivo : tablerosActivos) {
@@ -378,11 +399,11 @@ public class Shobu {
                 for (int ac1 = 0; ac1 < 4; ac1++) {
                     Ficha fichaActiva = activoActual.getFicha(af1, ac1);
 
-                    if (fichaActiva != null && fichaActiva.getColor().equalsIgnoreCase(jugadorActual.getColor())) {
+                    if (esFichaDelJugadorActual(fichaActiva)) {
                         int af2 = af1 + disF;
                         int ac2 = ac1 + disC;
 
-                        if (af2 >= 0 && af2 < 4 && ac2 >= 0 && ac2 < 4) {
+                        if (estaEnTablero(af2, ac2)) {
                             if (esCasillaDisponible(tableroActivo, af1, ac1, af2, ac2, false, disF, disC)) {
                                 listaMovimientos.add(new ContenedorMovimientosMaquina(
                                         tableroPasivo, pf1, pc1, pf2, pc2,
@@ -397,6 +418,19 @@ public class Shobu {
 
         }
     }
+
+    private boolean esFichaDelJugadorActual(Ficha ficha) {
+        return ficha != null && ficha.getColor().equalsIgnoreCase(jugadorActual.getColor());
+    }
+
+    private boolean estaEnTablero(int fila, int col) {
+        return fila >= 0 && fila < 4 && col >= 0 && col < 4;
+    }
+
+    private String colorOpuestoTablero(String llaveTablero) {
+        return llaveTablero.split("_")[0].equalsIgnoreCase("blanco") ? "oscuro" : "blanco";
+    }
+
 
 
 }

@@ -1,6 +1,9 @@
 package com.example.practica4.Modelo;
 
-
+/**
+ * Contiene todos los movimientos que hará la maquina en un turno, tanto en la fase
+ * pasiva como activa
+ */
 public class ContenedorMovimientosMaquina {
     private String tableroPasivo;
     private int pasivoFila1, pasivoColumna1;

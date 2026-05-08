@@ -29,11 +29,20 @@ public class VistaShobu extends Application {
     Label labelTurnoActual;
     Label labelFaseActual;
 
+    /**
+     * Este metodo inicia el juego
+     * @param stage Ventana principal del juego
+     */
     @Override
     public void start(Stage stage) {
         crearMenuPrincipal(stage);
     }
 
+    /**
+     * Este metodo crea el menu principal del Shobu,
+     * donde se insta a jugar contra otro jugador o contra la maquia
+     * @param stage Ventana principal
+     */
     public void crearMenuPrincipal(Stage stage) {
         VBox menu = new VBox(30);
         menu.setAlignment(Pos.CENTER);
@@ -76,9 +85,9 @@ public class VistaShobu extends Application {
 
     /**
      * Esta clase nos permite crear una ventana del juego de Shobu
-     * @param stage
-     * @param contraMaquina
-     * @throws IOException
+     * @param stage Ventana principal
+     * @param contraMaquina Verificacion si se va a jugar contra la maquina
+     * @throws IOException En caso de un error al crear la ventana, se arroja una excepción
      */
     public void iniciarJuego(Stage stage, boolean contraMaquina) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(VistaShobu.class.getResource("/com/example/practica4/hello-view.fxml"));
@@ -134,10 +143,10 @@ public class VistaShobu extends Application {
     }
 
     /**
-     * Este metodo crea los 4 tableros
-     * @param nombreTablero
-     * @param tablero
-     * @param controlador
+     * Este metodo crea visualmente un tablero
+     * @param nombreTablero Nombre del tablero a crear
+     * @param tablero Tablero de shobu a mostrar
+     * @param controlador Controlador del juego
      * @return Regresa un GridPane, donde se dibuja el tablero
      */
     public GridPane crearTableros(String nombreTablero, TableroShobu tablero, Controlador controlador) {
@@ -185,6 +194,9 @@ public class VistaShobu extends Application {
         return grid;
     }
 
+    /**
+     * Este metodo actualiza la vista del juego
+     */
     public void actualizarVista() {
         contenedorCentral.getChildren().clear();
 
@@ -263,18 +275,27 @@ public class VistaShobu extends Application {
 
     }
 
+    /**
+     * Este metodo cambia el texto correspondiente al turno actual de cada jugador
+     * @param nuevoMensaje Contenido del mensaje, por lo regular el nombre del jugador
+     */
     public void cambiarTextoTurnoActual(String nuevoMensaje) {
         labelTurnoActual.setText(nuevoMensaje);
         labelTurnoActual.setAlignment(Pos.CENTER);
     }
 
+    /**
+     * Este metodo muestra una alerta a partir de un tipo,
+     * @param tipo Tipo de alerta, proveniente de Alert.AlertType
+     * @param titulo Titulo para el mensaje de la alerta
+     * @param mensaje Contenido del mensaje para la alerta
+     */
     public void mostrarAlerta(Alert.AlertType tipo, String titulo, String mensaje) {
         Alert alerta = new Alert(tipo);
         alerta.setTitle(titulo);
         alerta.setHeaderText(null);
         alerta.setContentText(mensaje);
         alerta.showAndWait();
-
     }
 
 }

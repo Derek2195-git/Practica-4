@@ -81,7 +81,7 @@ public class VistaShobu extends Application {
         FXMLLoader fxmlLoader = new FXMLLoader(VistaShobu.class.getResource("/com/example/practica4/hello-view.fxml"));
         fxmlLoader.load();
 
-        Jugador j1 = new Jugador("Derek", "Negras", true);
+        Jugador j1 = new Jugador("Jugador1", "Negras", true);
         Jugador j2;
 
         if (contraMaquina) {

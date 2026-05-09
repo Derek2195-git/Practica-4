@@ -74,6 +74,17 @@ public class Shobu {
                 if (esFasePasiva || esFichaDelJugadorActual(fichaIntermedia)) {
                     return false;
                 }
+
+                if (tablero.getFicha(fila2, columna2) != null) {
+                    System.out.println("Rechazado: destino ocupado al empujar intermedia");
+                    return false;
+                }
+                int filaDetrasDestino = fila2 + direccionFilas;
+                int colDetrasDestino = columna2 + direccionColumnas;
+                if (estaEnTablero(filaDetrasDestino, colDetrasDestino) &&
+                        tablero.getFicha(filaDetrasDestino, colDetrasDestino) != null) {
+                    return false;
+                }
             }
         }
 
@@ -85,7 +96,6 @@ public class Shobu {
 
             if (esFichaDelJugadorActual(fichaAMover)) return false;
 
-            int distancia = Math.max(distanciaFila, distanciaCol);
             int filaDetras = fila2 + direccionFilas ;
             int colDetras = columna2 + direccionColumnas ;
 
@@ -121,10 +131,13 @@ public class Shobu {
 
         if (!esFasePasiva && fichaAEmpujar != null) {
             int filaFichaEmpujada = fila2 + direccionFilas;
-            int colFichaEmpujada = fila2 + direccionColumnas;
+            int colFichaEmpujada = columna2 + direccionColumnas;
 
             if (estaEnTablero(filaFichaEmpujada, colFichaEmpujada)) {
-                tablero.setFicha(filaFichaEmpujada, colFichaEmpujada, fichaAEmpujar);
+                Ficha fichaDestino = tablero.getFicha(filaFichaEmpujada, colFichaEmpujada);
+                if (fichaDestino == null) {
+                    tablero.setFicha(filaFichaEmpujada, colFichaEmpujada, fichaAEmpujar);
+                }
             }
             tablero.setFicha(filaEmpuje, colEmpuje, null);
         }
@@ -133,33 +146,6 @@ public class Shobu {
         tablero.setFicha(fila1, columna1, null);
     }
 
-    
-    public boolean hayGanador() {
-        return ganadorDeclarado;
-    }
-
-    
-    public Jugador getJugador1() {
-        return jugador1;
-    }
-
-    
-    public Jugador getJugadorActual() {
-        return jugadorActual;
-    }
-
-    
-    public HashMap<String, TableroShobu> getTableros() {
-        return tableros;
-    }
-
-    
-    public void cambiarTurno() {
-        if (jugadorActual == jugador1) {
-            jugadorActual = jugador2;
-        } else jugadorActual = jugador1;
-
-    }
 
     
     public boolean esCasillaDisponible(String llaveTablero, int fila, int col,
@@ -176,7 +162,8 @@ public class Shobu {
                     noHayObstaculos(llaveTablero, fila, col,
                             filaAMover, columnaAMover, esFasePasiva);
         } else {
-            return (filaAMover - fila == distanciaX && columnaAMover - col == distanciaY) &&
+            return (esMovimientoValido(fila, col, filaAMover, columnaAMover) &&
+                    filaAMover - fila == distanciaX && columnaAMover - col == distanciaY) &&
                     noHayObstaculos(llaveTablero, fila, col, filaAMover, columnaAMover, esFasePasiva);
         }
     }
@@ -200,7 +187,8 @@ public class Shobu {
                         int destinoCol = c + distanciaY;
 
                         if (estaEnTablero(destinoFila, destinoCol)) {
-                            if (esCasillaDisponible(nombreTablero, f, c, destinoFila, destinoCol, false, distanciaX, distanciaY)) {
+                            if (esCasillaDisponible(nombreTablero, f, c, destinoFila, destinoCol, false, distanciaX, distanciaY)
+                            ) {
                                 return true;
                             }
                         }
@@ -263,7 +251,8 @@ public class Shobu {
     
     public void buscarMovimientosPasivos(ArrayList<ContenedorMovimientosMaquina> listaMovimientos) {
         String[] tablerosCreados = {"blanco_propio", "oscuro_propio", "blanco_opuesto", "oscuro_opuesto"};
-        for (String tableroPasivo : tablerosCreados) {
+        String[] tablerosPermitidos = {"blanco_opuesto", "oscuro_opuesto"};
+        for (String tableroPasivo : tablerosPermitidos) {
             TableroShobu pasivoActual = tableros.get(tableroPasivo);
             for (int pf1 = 0; pf1 < 4; pf1++) {
                 for (int pc1 = 0; pc1 < 4; pc1++) {
@@ -332,6 +321,35 @@ public class Shobu {
 
     private String colorOpuestoTablero(String llaveTablero) {
         return llaveTablero.split("_")[0].equalsIgnoreCase("blanco") ? "oscuro" : "blanco";
+    }
+
+
+
+    public boolean hayGanador() {
+        return ganadorDeclarado;
+    }
+
+
+    public Jugador getJugador1() {
+        return jugador1;
+    }
+
+
+    public Jugador getJugadorActual() {
+        return jugadorActual;
+    }
+
+
+    public HashMap<String, TableroShobu> getTableros() {
+        return tableros;
+    }
+
+
+    public void cambiarTurno() {
+        if (jugadorActual == jugador1) {
+            jugadorActual = jugador2;
+        } else jugadorActual = jugador1;
+
     }
 
 }

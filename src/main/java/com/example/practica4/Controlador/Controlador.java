@@ -5,9 +5,13 @@ import com.example.practica4.Modelo.Jugador;
 import com.example.practica4.Modelo.ContenedorMovimientosMaquina;
 import com.example.practica4.Modelo.Shobu;
 import com.example.practica4.Vista.VistaShobu;
+import javafx.animation.PauseTransition;
 import javafx.application.Application;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.util.Duration;
+
+import javax.swing.*;
 
 public class Controlador {
     @FXML
@@ -123,6 +127,7 @@ public class Controlador {
                     Jugador ganador = juego.verificarGanador();
                     if (ganador != null) {
                         vista.cambiarTextoTurnoActual("Ganó: " + ganador.getNombre());
+                        vista.mostrarAlerta(Alert.AlertType.INFORMATION, "GANADOR", "Un jugador ha ganado");
                     } else {
                         juego.cambiarTurno();
                         vista.cambiarTextoTurnoActual("Turno de " + juego.getJugadorActual().getNombre());
@@ -152,18 +157,31 @@ public class Controlador {
         if (jugada != null) {
             juego.moverFicha(jugada.getTableroPasivo(), jugada.getPasivoFila1(), jugada.getPasivoColumna1(), jugada.getPasivoFila2(), jugada.getPasivoColumna2(), true);
 
-            juego.moverFicha(jugada.getTableroActivo(), jugada.getActivoFila1(), jugada.getActivoColumna1(), jugada.getActivoFila2(), jugada.getActivoColumna2(), false);
+            int pausa = 3000;
 
-            Jugador ganador = juego.verificarGanador();
-
-            if(ganador != null) {
-                vista.cambiarTextoTurnoActual("Ganó la maquina!");
-            } else {
-                juego.cambiarTurno();
-                vista.cambiarTextoTurnoActual("Turno de " + juego.getJugadorActual().getNombre());
-            }
+            PauseTransition timer = new PauseTransition(Duration.seconds(3));
 
             vista.actualizarVista();
+
+            timer.setOnFinished(e -> {
+
+                juego.moverFicha(jugada.getTableroActivo(), jugada.getActivoFila1(), jugada.getActivoColumna1(), jugada.getActivoFila2(), jugada.getActivoColumna2(), false);
+
+
+                Jugador ganador = juego.verificarGanador();
+
+                if(ganador != null) {
+                    vista.cambiarTextoTurnoActual("Ganó la maquina!");
+                } else {
+                    juego.cambiarTurno();
+                    vista.cambiarTextoTurnoActual("Turno de " + juego.getJugadorActual().getNombre());
+                }
+
+                vista.actualizarVista();
+            });
+
+            timer.playFromStart();
+
         }
     }
 

@@ -2,6 +2,7 @@ module com.example.practica4 {
     requires javafx.controls;
     requires javafx.fxml;
     requires javafx.graphics;
+    requires java.desktop;
 
     exports com.example.practica4.Modelo;
     opens com.example.practica4.Modelo to javafx.fxml;
